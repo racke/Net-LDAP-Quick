@@ -23,6 +23,8 @@ our $VERSION = '0.01';
 use Net::LDAP;
 use Net::LDAP::Quick::Handle;
 use YAML qw/LoadFile/;
+use Cwd;
+use File::Spec::Functions qw/catfile/;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -165,9 +167,10 @@ sub _get_settings {
 }
 
 sub _load_ldap_settings {
+    my $dir = $ENV{LDAP_CONFIG_DIR} || getcwd;
     foreach my $f (qw/ldap.yaml ldap.yml .ldap.yml .ldap.yaml/) {
-        if (-f $f) {
-            $settings = LoadFile($f);
+        if (-f catfile($dir, $f)) {
+            $settings = LoadFile(catfile($dir, $f));
             last;
         }
     }
@@ -175,7 +178,7 @@ sub _load_ldap_settings {
         return $settings;
     }
     else {
-        die "No ldap.yaml found in current directory!";
+        die "No ldap.yaml found in $dir!";
     }
 }
 
